@@ -5,8 +5,8 @@ import com.aluracursos.challenges.literalura.model.DatosLibros;
 import com.aluracursos.challenges.literalura.service.ConsumoAPI;
 import com.aluracursos.challenges.literalura.service.ConvierteDatos;
 
-import java.util.Comparator;
-import java.util.DoubleSummaryStatistics;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -15,46 +15,62 @@ public class Principal {
     private final ConsumoAPI consumoAPI = new ConsumoAPI();
     private final ConvierteDatos conversor = new ConvierteDatos();
 
-    public void mostrarTop10Libros() {
-        var json = consumoAPI.obtenerDatos(URL_BASE);
-        var datos = conversor.obtenerDatos(json, Datos.class);
+    // Lista para almacenar todos los libros buscados
+    private final List<DatosLibros> librosBuscados = new ArrayList<>();
 
-        System.out.println("\nTop 10 libros más descargados:");
-        datos.resultados().stream()
-                .sorted(Comparator.comparing(DatosLibros::numeroDeDescargas).reversed())
-                .limit(10)
-                .map(l -> l.titulo().toUpperCase())
-                .forEach(System.out::println);
-    }
-
+    // Método para buscar libro por título y almacenar el primer resultado
     public void buscarLibroPorTitulo(String tituloLibro) {
         var json = consumoAPI.obtenerDatos(URL_BASE + "?search=" + tituloLibro.replace(" ", "+"));
         var datosBusqueda = conversor.obtenerDatos(json, Datos.class);
 
         Optional<DatosLibros> libroBuscado = datosBusqueda.resultados().stream()
-                .filter(l -> l.titulo().toUpperCase().contains(tituloLibro.toUpperCase()))
-                .findFirst();
+                .findFirst(); // Retenemos el primer resultado
 
         if (libroBuscado.isPresent()) {
+            DatosLibros libro = libroBuscado.get();
+            librosBuscados.add(libro); // Almacenamos el libro en la lista
             System.out.println("\nLibro encontrado:");
-            System.out.println(libroBuscado.get());
+            System.out.println("Título: " + libro.titulo());
+            System.out.println("Autor: " + libro.autor());
+            System.out.println("Idioma: " + libro.idioma());
+            System.out.println("Número de descargas: " + libro.numeroDeDescargas());
         } else {
             System.out.println("\nLibro no encontrado.");
         }
     }
 
-    public void mostrarEstadisticas() {
-        var json = consumoAPI.obtenerDatos(URL_BASE);
-        var datos = conversor.obtenerDatos(json, Datos.class);
+    // Método para mostrar todos los libros buscados
+    public void mostrarTodosLosLibrosBuscados() {
+        if (librosBuscados.isEmpty()) {
+            System.out.println("\nNo se han buscado libros aún.");
+        } else {
+            System.out.println("\nListado de todos los libros buscados:");
+            librosBuscados.forEach(libro -> {
+                System.out.println("Título: " + libro.titulo());
+                System.out.println("Autor: " + libro.autor());
+                System.out.println("Idioma: " + libro.idioma());
+                System.out.println("Número de descargas: " + libro.numeroDeDescargas());
+                System.out.println("-----------------------------");
+            });
+        }
+    }
 
-        DoubleSummaryStatistics est = datos.resultados().stream()
-                .filter(d -> d.numeroDeDescargas() > 0)
-                .collect(Collectors.summarizingDouble(DatosLibros::numeroDeDescargas));
+    // Método para mostrar libros según el idioma
+    public void mostrarLibrosPorIdioma(String idioma) {
+        var librosPorIdioma = librosBuscados.stream()
+                .filter(libro -> libro.idioma().equalsIgnoreCase(idioma))
+                .collect(Collectors.toList());
 
-        System.out.println("\nEstadísticas de descargas:");
-        System.out.println("Promedio: " + est.getAverage());
-        System.out.println("Máximo: " + est.getMax());
-        System.out.println("Mínimo: " + est.getMin());
-        System.out.println("Cantidad de libros evaluados: " + est.getCount());
+        if (librosPorIdioma.isEmpty()) {
+            System.out.println("\nNo se encontraron libros en el idioma: " + idioma);
+        } else {
+            System.out.println("\nListado de libros en el idioma: " + idioma);
+            librosPorIdioma.forEach(libro -> {
+                System.out.println("Título: " + libro.titulo());
+                System.out.println("Autor: " + libro.autor());
+                System.out.println("Número de descargas: " + libro.numeroDeDescargas());
+                System.out.println("-----------------------------");
+            });
+        }
     }
 }
