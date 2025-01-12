@@ -9,6 +9,7 @@ import com.aluracursos.challenges.literalura.service.ConvierteDatos;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class Principal {
@@ -18,6 +19,42 @@ public class Principal {
 
     // Lista para almacenar todos los libros buscados
     private final List<DatosLibros> librosBuscados = new ArrayList<>();
+
+    public boolean ejecutarOpcion(int opcion) {
+        Scanner scanner = new Scanner(System.in);
+        switch (opcion) {
+            case 1:
+                System.out.print("Ingrese el nombre del libro que desea buscar: ");
+                String titulo = scanner.nextLine();
+                buscarLibroPorTitulo(titulo);
+                break;
+            case 2:
+                mostrarTodosLosLibrosBuscados();
+                break;
+            case 3:
+                System.out.print("Ingrese el idioma para filtrar libros: ");
+                String idioma = scanner.nextLine();
+                mostrarLibrosPorIdioma(idioma);
+                break;
+            case 4:
+                listarAutores();
+                break;
+            case 5:
+                System.out.print("Ingrese el año para buscar autores vivos: ");
+                try {
+                    int anio = Integer.parseInt(scanner.nextLine());
+                    listarAutoresVivosEnAnio(anio);
+                } catch (NumberFormatException e) {
+                    System.out.println("Año inválido. Por favor, ingrese un número válido.");
+                }
+                break;
+            case 6:
+                return false;
+            default:
+                System.out.println("Opción inválida. Por favor, seleccione un número entre 1 y 6.");
+        }
+        return true;
+    }
 
     // Método para buscar libro por título y almacenar el primer resultado
     public void buscarLibroPorTitulo(String tituloLibro) {
