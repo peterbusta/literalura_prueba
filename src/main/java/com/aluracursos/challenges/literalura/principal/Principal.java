@@ -57,20 +57,22 @@ public class Principal {
 
     // Método para mostrar libros según el idioma
     public void mostrarLibrosPorIdioma(String idioma) {
-        var librosPorIdioma = librosBuscados.stream()
-                .filter(libro -> libro.idioma().equalsIgnoreCase(idioma))
-                .collect(Collectors.toList());
+    var librosPorIdioma = librosBuscados.stream()
+            .filter(libro -> !libro.idioma().isEmpty() && // Verifica que la lista no esté vacía
+                             libro.idioma().get(0).equalsIgnoreCase(idioma)) // Compara con el primer idioma
+            .collect(Collectors.toList());
 
-        if (librosPorIdioma.isEmpty()) {
-            System.out.println("\nNo se encontraron libros en el idioma: " + idioma);
-        } else {
-            System.out.println("\nListado de libros en el idioma: " + idioma);
-            librosPorIdioma.forEach(libro -> {
-                System.out.println("Título: " + libro.titulo());
-                System.out.println("Autor: " + libro.autor());
-                System.out.println("Número de descargas: " + libro.numeroDeDescargas());
-                System.out.println("-----------------------------");
-            });
-        }
+    if (librosPorIdioma.isEmpty()) {
+        System.out.println("\nNo se encontraron libros en el idioma: " + idioma);
+    } else {
+        System.out.println("\nListado de libros en el idioma: " + idioma);
+        librosPorIdioma.forEach(libro -> {
+            System.out.println("Título: " + libro.titulo());
+            System.out.println("Autor: " + libro.autor());
+            System.out.println("Número de descargas: " + libro.numeroDeDescargas());
+            System.out.println("-----------------------------");
+        });
     }
+}
+
 }
