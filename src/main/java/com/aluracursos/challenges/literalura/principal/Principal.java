@@ -2,6 +2,7 @@ package com.aluracursos.challenges.literalura.principal;
 
 import com.aluracursos.challenges.literalura.model.Datos;
 import com.aluracursos.challenges.literalura.model.DatosLibros;
+import com.aluracursos.challenges.literalura.model.DatosAutor;
 import com.aluracursos.challenges.literalura.service.ConsumoAPI;
 import com.aluracursos.challenges.literalura.service.ConvierteDatos;
 
@@ -31,8 +32,10 @@ public class Principal {
             librosBuscados.add(libro); // Almacenamos el libro en la lista
             System.out.println("\nLibro encontrado:");
             System.out.println("Título: " + libro.titulo());
-            System.out.println("Autor: " + libro.autor());
-            System.out.println("Idioma: " + libro.idioma());
+            System.out.println("Autor: " + libro.autor().get(0).nombre());
+            System.out.println("Año de nacimiento: " + libro.autor().get(0).anioNacimiento());
+            System.out.println("Año de fallecimiento: " + libro.autor().get(0).anioFallecimiento());
+            System.out.println("Idioma: " + libro.idioma().get(0));
             System.out.println("Número de descargas: " + libro.numeroDeDescargas());
         } else {
             System.out.println("\nLibro no encontrado.");
@@ -47,8 +50,8 @@ public class Principal {
             System.out.println("\nListado de todos los libros buscados:");
             librosBuscados.forEach(libro -> {
                 System.out.println("Título: " + libro.titulo());
-                System.out.println("Autor: " + libro.autor());
-                System.out.println("Idioma: " + libro.idioma());
+                System.out.println("Autor: " + libro.autor().get(0).nombre());
+                System.out.println("Idioma: " + libro.idioma().get(0));
                 System.out.println("Número de descargas: " + libro.numeroDeDescargas());
                 System.out.println("-----------------------------");
             });
@@ -57,22 +60,61 @@ public class Principal {
 
     // Método para mostrar libros según el idioma
     public void mostrarLibrosPorIdioma(String idioma) {
-    var librosPorIdioma = librosBuscados.stream()
-            .filter(libro -> !libro.idioma().isEmpty() && // Verifica que la lista no esté vacía
-                             libro.idioma().get(0).equalsIgnoreCase(idioma)) // Compara con el primer idioma
-            .collect(Collectors.toList());
+        var librosPorIdioma = librosBuscados.stream()
+                .filter(libro -> !libro.idioma().isEmpty() && // Verifica que la lista no esté vacía
+                        libro.idioma().get(0).equalsIgnoreCase(idioma)) // Compara con el primer idioma
+                .collect(Collectors.toList());
 
-    if (librosPorIdioma.isEmpty()) {
-        System.out.println("\nNo se encontraron libros en el idioma: " + idioma);
-    } else {
-        System.out.println("\nListado de libros en el idioma: " + idioma);
-        librosPorIdioma.forEach(libro -> {
-            System.out.println("Título: " + libro.titulo());
-            System.out.println("Autor: " + libro.autor());
-            System.out.println("Número de descargas: " + libro.numeroDeDescargas());
-            System.out.println("-----------------------------");
-        });
+        if (librosPorIdioma.isEmpty()) {
+            System.out.println("\nNo se encontraron libros en el idioma: " + idioma);
+        } else {
+            System.out.println("\nListado de libros en el idioma: " + idioma);
+            librosPorIdioma.forEach(libro -> {
+                System.out.println("Título: " + libro.titulo());
+                System.out.println("Autor: " + libro.autor().get(0).nombre());
+                System.out.println("Número de descargas: " + libro.numeroDeDescargas());
+                System.out.println("-----------------------------");
+            });
+        }
     }
-}
 
+    // Método para listar todos los autores
+    public void listarAutores() {
+        if (librosBuscados.isEmpty()) {
+            System.out.println("\nNo se han buscado libros aún.");
+        } else {
+            System.out.println("\nListado de autores de los libros buscados:");
+            librosBuscados.stream()
+                    .map(libro -> libro.autor().get(0)) // Obtiene el primer autor de cada libro
+                    .distinct() // Evita duplicados
+                    .forEach(autor -> {
+                        System.out.println("Nombre: " + autor.nombre());
+                        System.out.println("Año de nacimiento: " + autor.anioNacimiento());
+                        System.out.println("Año de fallecimiento: " + autor.anioFallecimiento());
+                        System.out.println("-----------------------------");
+                    });
+        }
+    }
+
+    // Método para listar autores vivos en un año determinado
+    public void listarAutoresVivosEnAnio(int anio) {
+        var autoresVivos = librosBuscados.stream()
+                .map(libro -> libro.autor().get(0)) // Obtiene el primer autor de cada libro
+                .filter(autor -> autor.anioNacimiento() <= anio && // Nacieron antes o durante el año
+                        (autor.anioFallecimiento() == null || autor.anioFallecimiento() > anio)) // No han fallecido aún
+                .distinct() // Evita duplicados
+                .collect(Collectors.toList());
+
+        if (autoresVivos.isEmpty()) {
+            System.out.println("\nNo se encontraron autores vivos en el año: " + anio);
+        } else {
+            System.out.println("\nListado de autores vivos en el año: " + anio);
+            autoresVivos.forEach(autor -> {
+                System.out.println("Nombre: " + autor.nombre());
+                System.out.println("Año de nacimiento: " + autor.anioNacimiento());
+                System.out.println("Año de fallecimiento: " + (autor.anioFallecimiento() != null ? autor.anioFallecimiento() : "Aún vivo"));
+                System.out.println("-----------------------------");
+            });
+        }
+    }
 }
